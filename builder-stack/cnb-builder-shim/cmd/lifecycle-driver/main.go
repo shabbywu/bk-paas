@@ -50,6 +50,8 @@ const (
 	CacheImageEnvVarKey = "CACHE_IMAGE"
 	// OutputImageEnvVarKey The env var key that store output image
 	OutputImageEnvVarKey = "OUTPUT_IMAGE"
+	// UseDockerDaemonEnvVarKey The env var key that store a flag meaning if use docker daemon
+	UseDockerDaemonEnvVarKey = "USE_DOCKER_DAEMON"
 
 	// DevModeEnvVarKey The env var key that indicates whether to use the dev mode or not
 	DevModeEnvVarKey = "DEV_MODE"
@@ -85,10 +87,11 @@ var (
 		os.Getenv(OutputImageEnvVarKey),
 		"The name of image that will get created by the lifecycle.",
 	)
+	useDaemon = flag.Bool("daemon", utils.BoolEnv("USE_DOCKER_DAEMON"), "export image to docker daemon")
 
 	logLevel = flag.String("log-level", "info", "logging level")
 
-	dev = flag.Bool("dev", utils.BoolEnv(DevModeEnvVarKey), "use dev mode or not")
+	dev = flag.Bool("dev", utils.BoolEnv(UseDockerDaemonEnvVarKey), "use dev mode or not")
 )
 
 func init() {
@@ -255,6 +258,7 @@ func getBuilderSteps(ctx context.Context) []Step {
 			*groupPath,
 			*layersDir,
 			*logLevel,
+			*useDaemon,
 			*uid,
 			*gid,
 		),

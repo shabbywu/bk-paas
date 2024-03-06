@@ -30,6 +30,7 @@ import (
 func MakeExporterCmd(
 	ctx context.Context,
 	lifecycleDir, outputImage, appDir, analyzedPath, cacheImage, groupPath, layersDir, logLevel string,
+	useDaemon bool,
 	uid, gid uint32,
 ) *exec.Cmd {
 	args := []string{
@@ -44,6 +45,9 @@ func MakeExporterCmd(
 	// export cache when cacheImage is set
 	if cacheImage != "" {
 		args = append(args, "-cache-image", cacheImage)
+	}
+	if useDaemon {
+		args = append(args, "-daemon")
 	}
 	args = append(args, outputImage)
 	return exec.CommandContext(ctx, filepath.Join(lifecycleDir, "exporter"), args...)
