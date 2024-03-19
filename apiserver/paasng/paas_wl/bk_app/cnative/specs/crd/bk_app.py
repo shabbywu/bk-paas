@@ -21,7 +21,6 @@ to the current version of the project delivered to anyone in the future.
 Use `pydantic` to get good JSON-Schema support, which is essential for CRD.
 """
 import datetime
-import shlex
 from typing import Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field, validator
@@ -29,6 +28,7 @@ from pydantic import BaseModel, Field, validator
 from paas_wl.bk_app.cnative.specs.apis import ObjectMetadata
 from paas_wl.bk_app.cnative.specs.constants import ApiVersion, MResPhaseType, ResQuotaPlan
 from paas_wl.workloads.release_controller.constants import ImagePullPolicy
+from paasng.utils.procfile import generate_bash_command_with_tokens
 from paasng.utils.structure import register
 
 
@@ -143,11 +143,7 @@ class BkAppProcess(BaseModel):
         """
         if self.proc_command:
             return self.proc_command
-        # Warning: 已知 shlex.join 不支持环境变量, 对于 buildpack 构建的应用, 使用 app_desc v3 描述文件, 有可能出现无法正常运行的问题
-        # 例如会报错: Error: '${PORT:-5000}' is not a valid port number.
-        return self._sanitize_proc_command(
-            (shlex.join(self.command or []) + " " + shlex.join(self.args or [])).strip()
-        )
+        return generate_bash_command_with_tokens(self.command or [], self.args or [])
 
     @staticmethod
     def _sanitize_proc_command(proc_command: str) -> str:
